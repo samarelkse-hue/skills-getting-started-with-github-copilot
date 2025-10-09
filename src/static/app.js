@@ -19,20 +19,26 @@ document.addEventListener("DOMContentLoaded", () => {
         activityCard.className = "activity-card";
 
         const spotsLeft = details.max_participants - details.participants.length;
+        const isFull = spotsLeft <= 0;
+
+        if (isFull) {
+          activityCard.classList.add("full");
+        }
 
         activityCard.innerHTML = `
-          <h4>${name}</h4>
+          <h4>${name}${isFull ? ' <span class="full-badge">(FULL)</span>' : ''}</h4>
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
-          <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          <p><strong>Availability:</strong> ${isFull ? 'No spots available' : `${spotsLeft} spots left`}</p>
         `;
 
         activitiesList.appendChild(activityCard);
 
-        // Add option to select dropdown
+        // Add option to select dropdown (disable if full)
         const option = document.createElement("option");
         option.value = name;
-        option.textContent = name;
+        option.textContent = name + (isFull ? ' (FULL)' : '');
+        option.disabled = isFull;
         activitySelect.appendChild(option);
       });
     } catch (error) {
@@ -62,6 +68,8 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        // Refresh activities list to show updated availability
+        fetchActivities();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
